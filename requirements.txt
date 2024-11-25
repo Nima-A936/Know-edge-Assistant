@@ -2,6 +2,5 @@ faiss-cpu
 langchain
 PyPDF2
 numpy
-os
 streamlit
 openai
