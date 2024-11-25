@@ -9,8 +9,8 @@ from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader
 import base64
 
-# Make sure the OpenAI API key is set via environment variable
-openai.api_key = st.secrets("OPENAI_API_KEY")
+# Make sure the OpenAI API key is set via Streamlit's secrets
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 if openai.api_key is None:
     raise ValueError("API key is not set! Please set the OPENAI_API_KEY environment variable.")
@@ -31,9 +31,6 @@ def set_background(image_file):
 
 # Set the background
 set_background("background.png")
-
-# Initialize OpenAI client
-client = openai.Client(api_key=openai.api_key)
 
 # Define the LLM (Large Language Model)
 llm = ChatOpenAI(
@@ -64,7 +61,7 @@ for doc in texts:
 # Create embeddings for each chunk
 embeddings = []
 for doc in split_texts:
-    embedding_response = client.embeddings.create(
+    embedding_response = openai.Embedding.create(
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
@@ -106,7 +103,7 @@ if prompt := st.chat_input("Ask me anything about Data Science!"):
         st.markdown(prompt)
     
     # Generate embedding for the user prompt
-    query_response = client.embeddings.create(
+    query_response = openai.Embedding.create(
         input=prompt,
         model="text-embedding-ada-002"
     )
