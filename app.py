@@ -9,9 +9,9 @@ from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader
 import base64
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-if openai.api_key is None:
+if openai_api_key is None:
     raise ValueError("API key is not set! Please set the OPENAI_API_KEY environment variable.")
 
 
@@ -41,7 +41,7 @@ with st.sidebar:
     )
 
 
-client = openai.Client(api_key=openai.api_key)
+client = openai.Client(api_key=openai_api_key)
 
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
