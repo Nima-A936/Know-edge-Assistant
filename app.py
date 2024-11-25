@@ -36,7 +36,7 @@ set_background("background.png")
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
     model="gpt-3.5-turbo",
-    api_key=openai.api_key
+    api_key="aa-gAp2CUy0mkUSBkHkJ8HpVNnVW099QOZgkKG99LN8gpxc5fwT"
 )
 
 # Path to your PDF file
