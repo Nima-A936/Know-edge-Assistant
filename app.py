@@ -10,7 +10,7 @@ from PyPDF2 import PdfReader
 import base64
 
 # Make sure the OpenAI API key is set via environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = st.secrets("OPENAI_API_KEY")
 
 if openai.api_key is None:
     raise ValueError("API key is not set! Please set the OPENAI_API_KEY environment variable.")
