@@ -3,6 +3,7 @@ import faiss
 import numpy as np
 import openai
 import streamlit as st
+from langchain_openai import ChatOpenAI
 from langchain.schema import Document
 from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader
@@ -11,9 +12,12 @@ import base64
 # Retrieve API key from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
+# Check if the API key is set
+if openai_api_key is None:
+    raise ValueError("API key is not set! Please set the OPENAI_API_KEY in GitHub Secrets.")
 
-# Set the OpenAI API key
-openai.api_key = openai_api_key  # Set the OpenAI API key for openai.ChatCompletion
+# Initialize the OpenAI client (if using a wrapper that requires `openai.Client`)
+client = openai.Client(api_key=openai_api_key)  # Correct client initialization
 
 # Set up Streamlit app background
 def set_background(image_file):
@@ -41,6 +45,13 @@ with st.sidebar:
         """
     )
 
+# Initialize the ChatOpenAI client
+llm = ChatOpenAI(
+    base_url="https://api.avalai.ir/v1",
+    model="gpt-3.5-turbo",
+    api_key=openai_api_key  # Correctly pass the OpenAI API key here
+)
+
 # PDF text processing and embedding setup
 pdf_path = "Engine-v61n61p73-en.pdf"
 reader = PdfReader(pdf_path)
@@ -58,10 +69,10 @@ for doc in texts:
     for chunk in chunks:
         split_texts.append(Document(page_content=chunk, metadata=doc.metadata))
 
-# Create embeddings for the text using OpenAI's embedding API
 embeddings = []
 for doc in split_texts:
-    embedding_response = openai.Embedding.create(  # Correct method for embedding generation
+    # Use client to get embeddings
+    embedding_response = client.embeddings.create(  # Correct method to create embeddings using client
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
@@ -88,7 +99,7 @@ if prompt := st.chat_input("Ask Here!"):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    query_response = openai.Embedding.create(  # Create embeddings for the user query
+    query_response = client.embeddings.create(  # Correct method to create embeddings using client
         input=prompt,
         model="text-embedding-ada-002"
     )
@@ -108,18 +119,8 @@ if prompt := st.chat_input("Ask Here!"):
     {retrieved_texts}
     """
 
-    # Generate a response using the ChatCompletion API
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # Specify the model to use
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt_with_context},
-        ],
-    )
-
-    full_response = response['choices'][0]['message']['content']  # Get the response message
-
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
+        full_response = llm.invoke([{"role": "user", "content": prompt_with_context}]).content
         message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
