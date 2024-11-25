@@ -13,7 +13,7 @@ import base64
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # Set the OpenAI client key
-openai.api_key = openai_api_key
+client = openai.Client(api_key=openai_api_key)
 
 # Set up Streamlit app background
 def set_background(image_file):
@@ -67,7 +67,7 @@ for doc in texts:
 
 embeddings = []
 for doc in split_texts:
-    embedding_response = openai.Embedding.create(
+    embedding_response = client.embeddings.create(
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
@@ -94,7 +94,7 @@ if prompt := st.chat_input("Ask Here!"):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    query_response = openai.Embedding.create(
+    query_response = client.embedding.create(
         input=prompt,
         model="text-embedding-ada-002"
     )
