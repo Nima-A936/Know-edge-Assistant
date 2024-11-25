@@ -4,3 +4,4 @@ PyPDF2
 numpy
 streamlit
 openai
+langchain_openai
