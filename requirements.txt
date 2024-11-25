@@ -3,6 +3,6 @@ langchain
 PyPDF2
 numpy
 streamlit
-openai
+openai==0.28
 langchain_openai
 python-dotenv
