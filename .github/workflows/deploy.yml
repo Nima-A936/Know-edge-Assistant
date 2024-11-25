@@ -25,6 +25,6 @@ jobs:
 
       - name: Deploy to Streamlit
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Pass the secret
+          OPENAI_API_KEY: ${{ secrets.OPENAI}}  # Pass the secret
         run: |
           streamlit run app.py
