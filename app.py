@@ -12,8 +12,12 @@ import base64
 # Retrieve API key from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# Set the OpenAI client key
-client = openai.Client(api_key=openai_api_key)
+# Check if the API key is set
+if openai_api_key is None:
+    raise ValueError("API key is not set! Please set the OPENAI_API_KEY in GitHub Secrets.")
+
+# Initialize the OpenAI client (if using a wrapper that requires `openai.Client`)
+client = openai.Client(api_key=openai_api_key)  # Correct client initialization
 
 # Set up Streamlit app background
 def set_background(image_file):
@@ -45,7 +49,7 @@ with st.sidebar:
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
     model="gpt-3.5-turbo",
-    api_key="aa-gAp2CUy0mkUSBkHkJ8HpVNnVW099QOZgkKG99LN8gpxc5fwT"
+    api_key=openai_api_key  # Correctly pass the OpenAI API key here
 )
 
 # PDF text processing and embedding setup
@@ -67,11 +71,12 @@ for doc in texts:
 
 embeddings = []
 for doc in split_texts:
-    embedding_response = client.embeddings.create(
+    # Use client to get embeddings
+    embedding_response = client.embeddings.create(  # Correct method to create embeddings using client
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
-    embeddings.append(embedding_response.data[0].embedding)
+    embeddings.append(embedding_response['data'][0]['embedding'])
 
 embedding_dimension = len(embeddings[0])
 index = faiss.IndexFlatL2(embedding_dimension)
@@ -94,11 +99,11 @@ if prompt := st.chat_input("Ask Here!"):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    query_response = client.embedding.create(
+    query_response = client.embeddings.create(  # Correct method to create embeddings using client
         input=prompt,
         model="text-embedding-ada-002"
     )
-    query_embedding = np.array(query_response.data[0].embedding).reshape(1, -1)
+    query_embedding = np.array(query_response['data'][0]['embedding']).reshape(1, -1)
 
     k = 5  # Top 5 results
     distances, indices = index.search(query_embedding, k)
