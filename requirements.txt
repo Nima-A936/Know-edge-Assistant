@@ -1,7 +1,6 @@
 faiss-cpu
 langchain
 PyPDF2
-base64
 numpy
 os
 streamlit
