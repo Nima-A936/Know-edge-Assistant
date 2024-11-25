@@ -1,4 +1,4 @@
-faiss==1.5.3
+faiss-cpu
 langchain
 PyPDF2
 base64
