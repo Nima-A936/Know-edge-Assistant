@@ -16,8 +16,8 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 if openai_api_key is None:
     raise ValueError("API key is not set! Please set the OPENAI_API_KEY in GitHub Secrets.")
 
-# Initialize the OpenAI client (if using a wrapper that requires `openai.Client`)
-client = openai.Client(api_key=openai_api_key)  # Correct client initialization
+# Set the OpenAI client key
+openai.api_key = openai_api_key  # Correct way to set the API key
 
 # Set up Streamlit app background
 def set_background(image_file):
@@ -71,8 +71,7 @@ for doc in texts:
 
 embeddings = []
 for doc in split_texts:
-    # Use client to get embeddings
-    embedding_response = client.embeddings.create(  # Correct method to create embeddings using client
+    embedding_response = openai.Embedding.create(  # Correct method to create embeddings
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
@@ -99,7 +98,7 @@ if prompt := st.chat_input("Ask Here!"):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    query_response = client.embeddings.create(  # Correct method to create embeddings using client
+    query_response = openai.Embedding.create(  # Correct method to create embeddings
         input=prompt,
         model="text-embedding-ada-002"
     )
