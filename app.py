@@ -9,7 +9,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader
 import base64
 
-openai_api_key = st.secrets["OPENAI_API_KEYs"]
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 if openai_api_key is None:
     raise ValueError("API key is not set! Please set the OPENAI_API_KEY environment variable.")
