@@ -39,7 +39,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 openai.api_key = openai_api_key
 
-client = openai.Client(api_key=openai_api_key)
+client = openai.Client(api_key="aa-gAp2CUy0mkUSBkHkJ8HpVNnVW099QOZgkKG99LN8gpxc5fwT")
 
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
