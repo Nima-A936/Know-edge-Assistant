@@ -61,7 +61,7 @@ for doc in texts:
 # Create embeddings for each chunk
 embeddings = []
 for doc in split_texts:
-    embedding_response = openai.Embedding.create(
+    embedding_response = client.embeddings.create(
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
@@ -103,7 +103,7 @@ if prompt := st.chat_input("Ask me anything about Data Science!"):
         st.markdown(prompt)
     
     # Generate embedding for the user prompt
-    query_response = openai.Embedding.create(
+    query_response = client.embeddings.create(
         input=prompt,
         model="text-embedding-ada-002"
     )
