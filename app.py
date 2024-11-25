@@ -9,15 +9,20 @@ from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader
 import base64
 
-openai_api_key = st.secrets["OPENAI_API_KEY"]
+# Retrieve API key from environment variables
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
+# Check if the API key is set
 if openai_api_key is None:
-    raise ValueError("API key is not set! Please set the OPENAI_API_KEY environment variable.")
+    raise ValueError("API key is not set! Please set the OPENAI_API_KEY in GitHub Secrets.")
 
+# Set the OpenAI client key
+openai.api_key = openai_api_key
 
+# Set up Streamlit app background
 def set_background(image_file):
     with open(image_file, "rb") as image:
-        encoded_image = base64.b64encode(image.read()).decode()  # Base64 encode the image
+        encoded_image = base64.b64encode(image.read()).decode()
     css = f"""
     <style>
     .stApp {{
@@ -28,28 +33,27 @@ def set_background(image_file):
     """
     st.markdown(css, unsafe_allow_html=True)
 
-# Set the background
 set_background("background.png")
 
 with st.sidebar:
     st.title('🤖💬 Knowledge Assistant')
     st.markdown(
         """
-        The Chatbot Assistant is an AI-powered application designed to help users interact with large datasets and get intelligent responses. 
-        It uses advanced natural language processing (NLP) techniques and machine learning models to understand user queries and retrieve relevant information          from a provided dataset, such as a PDF or CSV file.
+        The Chatbot Assistant is an AI-powered application designed to help users interact with large datasets 
+        and get intelligent responses. It uses advanced natural language processing (NLP) techniques and 
+        machine learning models to retrieve relevant information from a dataset.
         """
     )
 
-
-client = openai.Client(api_key=openai_api_key)
-
+# Initialize the ChatOpenAI client
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
     model="gpt-3.5-turbo",
-    api_key="aa-gAp2CUy0mkUSBkHkJ8HpVNnVW099QOZgkKG99LN8gpxc5fwT"
+    api_key=openai_api_key
 )
 
-pdf_path = r"Engine-v61n61p73-en.pdf"
+# PDF text processing and embedding setup
+pdf_path = "Engine-v61n61p73-en.pdf"
 reader = PdfReader(pdf_path)
 
 texts = []
@@ -67,7 +71,7 @@ for doc in texts:
 
 embeddings = []
 for doc in split_texts:
-    embedding_response = client.embeddings.create(
+    embedding_response = openai.Embedding.create(
         input=doc.page_content,
         model="text-embedding-ada-002"
     )
@@ -80,55 +84,27 @@ index.add(np.array(embeddings))
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Darker Chat Window CSS
-st.markdown("""
-    <style>
-        .user-message {
-            background-color: #333333;  /* Dark background for user messages */
-            color: white;                /* White text for readability */
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .assistant-message {
-            background-color: #444444;  /* Darker background for assistant messages */
-            color: white;                /* White text for readability */
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .stChatMessage {
-            padding-left: 0;
-            padding-right: 0;
-        }
-        
-    </style>
-""", unsafe_allow_html=True)
-
-# Display Title
-st.markdown('<div style="background-color: rgba(49, 48, 49, 0.8); padding: 21px; border-radius: 10px; text-align: center; color: #f1c40f;"><h1>Knowledge Assistant</h1></div>', unsafe_allow_html=True)
+# Display Title and Chat Messages
+st.markdown('<h1 style="color:#f1c40f;text-align:center;">Knowledge Assistant</h1>', unsafe_allow_html=True)
 
 for message in st.session_state.messages:
-    message_class = "user-message" if message["role"] == "user" else "assistant-message"
     with st.chat_message(message["role"]):
-        st.markdown(f'<div class="{message_class}">{message["content"]}</div>', unsafe_allow_html=True)
+        st.markdown(message["content"])
 
+# Handle User Input
 if prompt := st.chat_input("Ask Here!"):
-    # Append user message to session state
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user"):
-        st.markdown(f'<div class="user-message">{prompt}</div>', unsafe_allow_html=True)
+        st.markdown(prompt)
     
-    query_response = client.embeddings.create(
+    query_response = openai.Embedding.create(
         input=prompt,
         model="text-embedding-ada-002"
     )
     query_embedding = np.array(query_response.data[0].embedding).reshape(1, -1)
 
-    k = 5  # Top 5 most relevant results
+    k = 5  # Top 5 results
     distances, indices = index.search(query_embedding, k)
 
     matching_docs = [split_texts[i] for i in indices[0]]
@@ -144,17 +120,6 @@ if prompt := st.chat_input("Ask Here!"):
 
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        full_response = ""
-        
-        llm = ChatOpenAI(
-            base_url = "https://api.avalai.ir/v1",
-            model = "gpt-3.5-turbo",
-            api_key = "aa-gAp2CUy0mkUSBkHkJ8HpVNnVW099QOZgkKG99LN8gpxc5fwT"
-        )
-        response = llm.invoke([{"role" : "user" , "content" : prompt_with_context}])
-        
-        full_response = response.content
-        
-        message_placeholder.markdown(f'<div class="assistant-message">{full_response}</div>', unsafe_allow_html=True)
-    
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+        full_response = llm.invoke([{"role": "user", "content": prompt_with_context}]).content
+        message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
