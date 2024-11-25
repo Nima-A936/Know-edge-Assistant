@@ -37,9 +37,9 @@ with st.sidebar:
 
 
 
-openai.api_key = "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"
+openai.api_key = "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"
 
-client = openai.Client(api_key="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")
+client = openai.Client(api_key="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")
 
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
