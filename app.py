@@ -45,7 +45,7 @@ with st.sidebar:
 llm = ChatOpenAI(
     base_url="https://api.avalai.ir/v1",
     model="gpt-3.5-turbo",
-    api_key=openai_api_key
+    api_key="aa-gAp2CUy0mkUSBkHkJ8HpVNnVW099QOZgkKG99LN8gpxc5fwT"
 )
 
 # PDF text processing and embedding setup
