@@ -5,3 +5,4 @@ numpy
 streamlit
 openai
 langchain_openai
+dotenv
